@@ -7,7 +7,7 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Represents a deck of playingcards.
+ * Represents a deck of playingcards. This is just a dummy comment.
  */
 public class Deck {
 
