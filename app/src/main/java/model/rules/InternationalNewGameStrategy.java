@@ -1,28 +1,21 @@
 package model.rules;
 
-import model.Card;
 import model.Dealer;
-import model.Deck;
 import model.Player;
 
-
 class InternationalNewGameStrategy implements NewGameStrategy {
+  
+  
+  /** defines the implemented method, newGame.
 
-  public boolean newGame(Deck deck, Dealer dealer, Player player) {
-    Card.Mutable c;
-
-    c = deck.getCard();
-    c.show(true);
-    player.dealCard(c);
-
-    c = deck.getCard();
-    c.show(true);
-    dealer.dealCard(c);
-
-    c = deck.getCard();
-    c.show(true);
-    player.dealCard(c);
-
+   * @param dealer dealer
+   * @param player player
+   * @return boolean true
+   */
+  public boolean newGame(Dealer dealer, Player player) {
+    dealer.getShowCard(true, player);
+    dealer.getShowCard(true, dealer);
+    dealer.getShowCard(true, player);
     return true;
   }
 }

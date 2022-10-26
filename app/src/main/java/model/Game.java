@@ -5,8 +5,8 @@ package model;
  */
 public class Game {
 
-  private Dealer dealer;
-  private Player player;
+  public Dealer dealer;
+  public Player player;
 
   /**
    * Constructor that creates a new game instance with a dealer and player.
@@ -58,8 +58,7 @@ public class Game {
    * @return True if the dealer has the initiaive.
    */
   public boolean stand() {
-    // TODO: implement me
-    return false;
+    return dealer.stand();
   }
 
   /**

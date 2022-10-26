@@ -1,8 +1,10 @@
 package model;
 
+import java.util.ArrayList;
 import model.rules.HitStrategy;
 import model.rules.NewGameStrategy;
 import model.rules.RulesFactory;
+import model.rules.WinRule;
 
 /**
  * Represents a dealer player that handles the deck of cards and runs the game using rules.
@@ -12,6 +14,8 @@ public class Dealer extends Player {
   private Deck deck;
   private NewGameStrategy newGameRule;
   private HitStrategy hitRule;
+  private WinRule winRule;
+  public ArrayList<CardDeltObserver> subscribers;
 
   /**
    * Initializing constructor.
@@ -22,6 +26,9 @@ public class Dealer extends Player {
 
     newGameRule = rulesFactory.getNewGameRule();
     hitRule = rulesFactory.getHitRule();
+    winRule = rulesFactory.getWinRule();
+    subscribers = new ArrayList<CardDeltObserver>();
+
   }
 
   /**
@@ -35,7 +42,7 @@ public class Dealer extends Player {
       deck = new Deck();
       clearHand();
       player.clearHand();
-      return newGameRule.newGame(deck, this, player);
+      return newGameRule.newGame(/*deck, */ this, player);
     }
     return false;
   }
@@ -47,12 +54,8 @@ public class Dealer extends Player {
    * @return true if the player could get a new card, false otherwise.
    */
   public boolean hit(Player player) {
-    if (deck != null && player.calcScore() < maxScore && !isGameOver()) {
-      Card.Mutable c;
-      c = deck.getCard();
-      c.show(true);
-      player.dealCard(c);
-
+    if (deck != null && player.calcScore() < maxScore && !isGameOver() && hitRule.doHit(player)) {
+      getShowCard(true, player);
       return true;
     }
     return false;
@@ -65,12 +68,7 @@ public class Dealer extends Player {
    * @return True if the dealer is the winner, false if the player is the winner.
    */
   public boolean isDealerWinner(Player player) {
-    if (player.calcScore() > maxScore) {
-      return true;
-    } else if (calcScore() > maxScore) {
-      return false;
-    }
-    return calcScore() >= player.calcScore();
+    return winRule.winRule(player, this);
   }
 
   /**
@@ -89,8 +87,53 @@ public class Dealer extends Player {
    * The player has choosen to take no more cards, it is the dealers turn.
    */
   public boolean stand() {
-    //TODO: implement me
-    return false;
+    if (deck != null) {
+      showHand();
+      while (hitRule.doHit(this) == true) {
+        Card.Mutable c = deck.getCard();
+        c.show(true);
+        dealCard(c);  
+      } 
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * deals a card and notifys subscribers.
+
+   *@param shown whether ther card is shown or not
+   *@param player the player to recieve the card
+   */
+  public void getShowCard(boolean shown, Player player) { 
+    Card.Mutable c = this.deck.getCard();
+    c.show(shown);
+    notifySubs();
+    player.dealCard(c);
+  }
+
+  /**
+   * tells the subscribed player controller that a card has been delt.
+   */
+  public void notifySubs() {
+    for (CardDeltObserver cdo : subscribers) {
+      cdo.cardDelt();
+    }
+  }
+
+  /**
+   * adds a card delt subscriber.
+   */
+  public void addSub(CardDeltObserver cdo) {
+    subscribers.add(cdo);
+  }
+
+  /**
+   * removes a card delt subscriber.
+   */
+  public void removeSub(CardDeltObserver cdo) {
+    subscribers.remove(cdo);
   }
 
 }
